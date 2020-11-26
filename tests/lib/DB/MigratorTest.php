@@ -104,25 +104,6 @@ class MigratorTest extends \Test\TestCase {
 		return $this->connection->getDriver() instanceof \Doctrine\DBAL\Driver\PDOSqlite\Driver;
 	}
 
-	
-	public function testDuplicateKeyUpgrade() {
-		$this->expectException(\OC\DB\MigrationException::class);
-
-		if ($this->isSQLite()) {
-			$this->markTestSkipped('sqlite does not throw errors when creating a new key on existing data');
-		}
-		list($startSchema, $endSchema) = $this->getDuplicateKeySchemas();
-		$migrator = $this->manager->getMigrator();
-		$migrator->migrate($startSchema);
-
-		$this->connection->insert($this->tableName, ['id' => 1, 'name' => 'foo']);
-		$this->connection->insert($this->tableName, ['id' => 2, 'name' => 'bar']);
-		$this->connection->insert($this->tableName, ['id' => 2, 'name' => 'qwerty']);
-
-		$migrator->checkMigrate($endSchema);
-		$this->fail('checkMigrate should have failed');
-	}
-
 	public function testUpgrade() {
 		list($startSchema, $endSchema) = $this->getDuplicateKeySchemas();
 		$migrator = $this->manager->getMigrator();
@@ -132,7 +113,6 @@ class MigratorTest extends \Test\TestCase {
 		$this->connection->insert($this->tableName, ['id' => 2, 'name' => 'bar']);
 		$this->connection->insert($this->tableName, ['id' => 3, 'name' => 'qwerty']);
 
-		$migrator->checkMigrate($endSchema);
 		$migrator->migrate($endSchema);
 		$this->addToAssertionCount(1);
 	}
@@ -151,7 +131,6 @@ class MigratorTest extends \Test\TestCase {
 		$this->connection->insert($this->tableName, ['id' => 2, 'name' => 'bar']);
 		$this->connection->insert($this->tableName, ['id' => 3, 'name' => 'qwerty']);
 
-		$migrator->checkMigrate($endSchema);
 		$migrator->migrate($endSchema);
 		$this->addToAssertionCount(1);
 
@@ -190,7 +169,6 @@ class MigratorTest extends \Test\TestCase {
 		$migrator = $this->manager->getMigrator();
 		$migrator->migrate($startSchema);
 
-		$migrator->checkMigrate($endSchema);
 		$migrator->migrate($endSchema);
 
 		$this->addToAssertionCount(1);
@@ -212,7 +190,7 @@ class MigratorTest extends \Test\TestCase {
 		$migrator = $this->manager->getMigrator();
 		$migrator->migrate($startSchema);
 
-		$migrator->checkMigrate($endSchema);
+
 		$migrator->migrate($endSchema);
 
 		$this->addToAssertionCount(1);
